@@ -1,26 +1,37 @@
-Attribute VB_Name = "prodPlan"
-' prodPlan.bas - K�zponti modul, amely �sszehangolja a t�bbi modult
+' prodPlan.bas - Központi modul, amely összehangolja a többi modult
+' Ez a modul felelős a fő munkafolyamat végrehajtásáért és koordinálásáért
 
 Option Explicit
 
-Public Sub ProductionPlan()
-    ' Napl�z�s ind�t�sa
-    modLogging.StartLogging
+' Fő eljárás, amely a PW tervezési folyamatot indítja
+Public Sub RunPwPlan()
+    On Error GoTo ErrorHandler
     
-    ' Adatok bet�lt�se
-    modDataLoader.LoadData
+    ' Naplózás indítása
+    modLogging.LogActivity "PW Plan folyamat indítása"
     
-    ' Form�z�s �s feldolgoz�s
+    ' Adatok betöltése és feldolgozása
+    modDataLoader.ProcessData
+    
+    ' Formázás és megjelenítés
     modFormatter.FormatWorksheet
     
-    ' Sz�m�t�sok v�grehajt�sa
+    ' Számítások végrehajtása
     modCalculations.CalculateSums
     
-    ' Export�l�s
+    ' Exportálás
     modExport.ExportToFile
     
-    ' Napl�z�s befejez�se
-    modLogging.EndLogging
+    ' Sikeres befejezés
+    modLogging.LogActivity "PW Plan folyamat sikeresen befejeződött"
+    Exit Sub
     
-    MsgBox "A production plan feldolgoz�sa sikeresen befejez�d�tt.", vbInformation
+ErrorHandler:
+    modLogging.LogError Err.Description, "RunPwPlan"
+    MsgBox "Hiba történt a végrehajtás során: " & Err.Description, vbCritical, "Hiba"
+End Sub
+
+' Eredeti PwPlan eljárás, amely továbbra is elérhető a visszafelé kompatibilitás érdekében
+Public Sub PwPlan()
+    RunPwPlan
 End Sub

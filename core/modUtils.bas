@@ -1,24 +1,95 @@
-Attribute VB_Name = "modUtils"
-' modUtils.bas - ¡ltal·nos segÈdfunkciÛk
+' modUtils.bas - √Åltal√°nos seg√©dfunkci√≥k
+' Ez a modul √°ltal√°nos seg√©dfunkci√≥kat tartalmaz, amelyeket t√∂bb modul is haszn√°lhat
 
 Option Explicit
 
-Public Function GetColumnByName(tbl As ListObject, colName As String) As Long
-    ' Oszlop indexÈnek megkeresÈse nÈv alapj·n
-    ' [Implement·ciÛ a jelenlegi kÛdbÛl]
-End Function
-
-Public Function GetSumRangeString(cells As Collection) As String
-    ' SZUM kÈplethez cellatartom·ny szˆveg ˆssze·llÌt·sa
-    ' [Implement·ciÛ a jelenlegi kÛdbÛl]
-End Function
-
+' Oszlop keres√©se a fejl√©c neve alapj√°n
 Public Function FindColumn(ws As Worksheet, headerName As String) As Long
-    ' Oszlop keresÈse a fejlÈc neve alapj·n
-    ' [⁄j segÈdfunkciÛ]
+    Dim lastCol As Long
+    Dim col As Long
+    
+    lastCol = ws.Cells(1, ws.Columns.Count).End(xlToLeft).Column
+    
+    For col = 1 To lastCol
+        If ws.Cells(1, col).Value = headerName Then
+            FindColumn = col
+            Exit Function
+        End If
+    Next col
+    
+    FindColumn = 0 ' Nem tal√°lhat√≥
 End Function
 
-Public Sub InitializeGlobalVariables()
-    ' Glob·lis v·ltozÛk inicializ·l·sa
-    ' [⁄j segÈdfunkciÛ]
+' Oszlop index√©nek megkeres√©se n√©v alapj√°n egy t√°bl√°zatban
+Public Function GetColumnByName(tbl As ListObject, colName As String) As Long
+    Dim col As ListColumn
+    
+    For Each col In tbl.ListColumns
+        If col.Name = colName Then
+            GetColumnByName = col.Index
+            Exit Function
+        End If
+    Next col
+    
+    GetColumnByName = 0 ' Nem tal√°lhat√≥
+End Function
+
+' SZUM k√©plethez cellatartom√°ny sz√∂veg √∂ssze√°ll√≠t√°sa
+Public Function GetSumRangeString(cells As Collection) As String
+    Dim result As String
+    Dim i As Long
+    
+    For i = 1 To cells.Count
+        result = result & cells(i)
+        If i < cells.Count Then result = result & ","
+    Next i
+    
+    GetSumRangeString = result
+End Function
+
+' Ellen≈ërzi, hogy egy f√°jl l√©tezik-e
+Public Function FileExists(filePath As String) As Boolean
+    On Error Resume Next
+    FileExists = (Dir(filePath) <> "")
+    On Error GoTo 0
+End Function
+
+' Ellen≈ërzi, hogy egy mappa l√©tezik-e
+Public Function FolderExists(folderPath As String) As Boolean
+    On Error Resume Next
+    FolderExists = (Dir(folderPath, vbDirectory) <> "")
+    On Error GoTo 0
+End Function
+
+' L√©trehoz egy mapp√°t, ha m√©g nem l√©tezik
+Public Sub CreateFolderIfNotExists(folderPath As String)
+    If Not FolderExists(folderPath) Then
+        MkDir folderPath
+    End If
+End Sub
+
+' Felhaszn√°l√≥i n√©v lek√©r√©se a k√∂rnyezeti v√°ltoz√≥kb√≥l
+Public Function GetUserName() As String
+    GetUserName = Environ$("USERNAME")
+End Function
+
+' Aktu√°lis d√°tum √©s id≈ë form√°zott sz√∂vegk√©nt
+Public Function GetFormattedDateTime() As String
+    GetFormattedDateTime = Format(Now, "yyyy.mm.dd. hh:mm")
+End Function
+
+' F√°jl utols√≥ m√≥dos√≠t√°s√°nak d√°tuma √©s ideje
+Public Function GetLastModifiedDateTime(filePath As String) As String
+    On Error Resume Next
+    GetLastModifiedDateTime = Format(FileDateTime(filePath), "yyyy.mm.dd. hh:mm")
+    On Error GoTo 0
+    
+    If Err.Number <> 0 Then
+        GetLastModifiedDateTime = ""
+    End If
+End Function
+
+' Debug √ºzenet ki√≠r√°sa az Immediate ablakba
+Public Sub DebugPrint(message As String)
+    Debug.Print Format(Now, "hh:mm:ss") & " - " & message
 End Sub
